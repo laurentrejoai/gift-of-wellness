@@ -7,10 +7,12 @@ const OPENS = Date.parse("2026-12-08T06:00:00Z");
 const CLOSES = Date.parse("2026-12-17T06:00:00Z");
 const MAX_STORY = 1500;
 
-const SPARKLES = [
-  { top: 18, left: "8%", s: 16 }, { top: 60, left: "88%", s: 12 },
-  { top: 150, left: "4%", s: 10 }, { top: 190, left: "93%", s: 16 }, { top: 110, left: "80%", s: 9 },
-];
+const SNOW = Array.from({ length: 26 }, (_, i) => ({
+  left: (i * 37) % 100,
+  size: 8 + ((i * 7) % 10),
+  dur: 9 + ((i * 5) % 9),
+  delay: -((i * 3.1) % 14),
+}));
 
 export default function Page() {
   const [phase, setPhase] = useState("open");
@@ -60,19 +62,30 @@ export default function Page() {
   }
 
   return (
-    <main className="wrap">
-      <div className="sparkles" aria-hidden="true">
-        {SPARKLES.map((p, i) => (
-          <span key={i} style={{ top: p.top, left: p.left, fontSize: p.s }}>✦</span>
+    <>
+    <header className="hero">
+      <div className="snow" aria-hidden="true">
+        {SNOW.map((f, i) => (
+          <span key={i} style={{ left: f.left + "%", fontSize: f.size, animationDuration: f.dur + "s", animationDelay: f.delay + "s" }}>❄</span>
         ))}
       </div>
+      <div className="hero-inner">
+        <div className="garland" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <i key={i} />)}</div>
+        <img className="logo" src="/logo-light.png" alt="Abundant Life Wellness Center" />
+        <p className="eyebrow">A Christmas giveaway</p>
+        <h1>Give the Gift <br />of <em>Wellness</em></h1>
+        {status !== "done" && (
+          <p className="lede">
+            Know someone who deserves a little care this Christmas? A mom who never stops, a caregiver,
+            a teacher, a nurse. Tell us about them, and our team will pick one person to surprise.
+          </p>
+        )}
+      </div>
+    </header>
 
-      <img className="logo" src="/logo.png" alt="Abundant Life Wellness Center" />
-      <p className="eyebrow">A Christmas giveaway</p>
-      <h1>Give the Gift <br />of <em>Wellness</em></h1>
-
+    <main className="wrap">
       {status === "done" ? (
-        <div className="card done">
+        <div className="tag done">
           <div className="big">🤍</div>
           <h2 style={{ border: 0, marginTop: 6 }}>Thank you for your nomination.</h2>
           <p>Our team will read every story. If your nominee is chosen, we'll reach out to you first to help plan the surprise.</p>
@@ -82,14 +95,11 @@ export default function Page() {
         </div>
       ) : (
         <>
-          <p className="lede">
-            Know someone who deserves a little care this Christmas? A mom who never stops, a caregiver,
-            a teacher, a nurse. Tell us about them, and our team will pick one person to surprise.
-          </p>
 
-          <div className="card prize">
-            <div className="gift" aria-hidden="true">🎁</div>
-            <div>
+
+          <div className="tag">
+            <span className="bow" aria-hidden="true">🎀</span>
+            <div className="tag-body">
               <div className="label">The gift</div>
               <div className="name">A Restorative Wellness Facial with Rachel</div>
             </div>
@@ -98,17 +108,17 @@ export default function Page() {
           <div className="dates">
             <div className="date"><b>Dec 8</b><small>Nominations open</small></div>
             <div className="date"><b>Dec 16</b><small>Nominations close</small></div>
-            <div className="date"><b>Dec 21</b><small>Winner revealed</small></div>
+            <div className="date reveal"><b>Dec 21</b><small>Winner revealed</small></div>
           </div>
 
           {phase === "soon" && (
-            <div className="card done">
+            <div className="tag notice">
               <p style={{ margin: 0 }}>Nominations open <b>Tuesday, December 8</b>. Check back then.</p>
             </div>
           )}
 
           {phase === "closed" && (
-            <div className="card done">
+            <div className="tag notice">
               <p style={{ margin: 0 }}>Nominations are closed. Thank you to everyone who shared a story. Watch for the winner reveal on <b>December 21</b>.</p>
             </div>
           )}
@@ -165,8 +175,10 @@ export default function Page() {
       )}
 
       <footer>
+        <span className="sprig" aria-hidden="true">🌲 ✦ 🌲</span>
         Abundant Life Wellness Center · <a href="tel:8173793770">817-379-3770</a>
       </footer>
     </main>
+    </>
   );
 }
