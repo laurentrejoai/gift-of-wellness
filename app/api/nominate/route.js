@@ -1,3 +1,5 @@
+import { getPool, ensureTable } from "../../../lib/db";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -32,7 +34,6 @@ export async function POST(req) {
     email: clean(body.nominatorEmail, 200),
     phone: clean(body.nominatorPhone, 40),
     help: body.helpSurprise !== false,
-    test: preview,
   };
 
   if (!row.nominee || !row.relationship || !row.story || !row.name) {
@@ -43,17 +44,17 @@ export async function POST(req) {
   }
 
   try {
-    const res = await fetch(process.env.SHEET_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...row, key: process.env.SHEET_KEY }),
-      redirect: "follow",
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!data.ok) throw new Error("sheet rejected");
+    const db = getPool();
+    await ensureTable(db);
+    await db.query(
+      `insert into gift_of_wellness_nominations
+        (nominee_name, relationship, story, nominator_name, nominator_email, nominator_phone, help_with_surprise, is_test)
+       values ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [row.nominee, row.relationship, row.story, row.name, row.email || null, row.phone || null, row.help, preview]
+    );
     return Response.json({ ok: true });
   } catch (err) {
-    console.error("nomination save failed", err);
+    console.error("nomination insert failed", err);
     return Response.json({ error: "We couldn't save that. Please try again, or call us at 817-379-3770." }, { status: 500 });
   }
 }
